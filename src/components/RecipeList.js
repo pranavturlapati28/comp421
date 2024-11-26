@@ -40,6 +40,7 @@ const RecipeList = () => {
                         <h2>{recipe.name}</h2>
                         <p>Serving Amount: {recipe.serving_amount}</p>
                         <p>Category: {recipe.category}</p>
+
                         <a href={recipe.link} target="_blank" rel="noopener noreferrer">
                             Instructions
                         </a>

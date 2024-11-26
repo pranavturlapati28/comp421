@@ -1,4 +1,4 @@
-import { supabase } from '/Users/pranavturlapati/recipe-collection/src/supabaseClient.js';
+import { supabase } from '../supabaseClient';
 
 /** Fetch all recipes with their associated ingredients and allergies */
 export const fetchRecipes = async () => {
@@ -135,4 +135,35 @@ export const addIngredient = async (ingredient) => {
         throw error;
     }
     return data;
+};
+
+export const updateRecipe = async (recipeId, updatedFields) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipe')
+            .update(updatedFields)
+            .eq('id', recipeId);
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error('Error updating recipe:', err);
+        return null;
+    }
+};
+
+
+export const deleteIngredientFromRecipe = async (recipeId, ingredientId) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipe_contains_ingredient')
+            .delete()
+            .match({ recipe_id: recipeId, ingredient_id: ingredientId });
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error('Error deleting ingredient:', err);
+        return null;
+    }
 };
