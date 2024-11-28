@@ -4,16 +4,17 @@ import AddRecipe from './components/AddRecipe';
 import RecipeDetails from './components/RecipeDetails';
 import UpdateRecipe from './components/UpdateRecipe';
 import './App.css';
+import AddIngredient from './components/AddIngredient';
 
 function App() {
     const [route, setRoute] = useState('/'); // Keep track of the current "route"
-    const [selectedRecipeId, setSelectedRecipeId] = useState(null); // Used for RecipeDetails
+    const [selectedRecipeId, setSelectedRecipeId] = useState(''); // Used for RecipeDetails
 
     // Navigate to a specific route
     const navigate = (path, params = null) => {
         setRoute(path);
-        if (params?.id) {
-            setSelectedRecipeId(params.id);
+        if (params) {
+            setSelectedRecipeId(params);
         }
     };
 
@@ -21,13 +22,15 @@ function App() {
     const renderPage = () => {
         switch (route) {
             case '/':
-                return <RecipeList navigate={navigate} />;
+                return <RecipeList onUpdate={(it) => navigate('/update', it)}/>;
             case '/add':
-                return <AddRecipe navigate={navigate} />;
+                return <AddRecipe />;
+            case '/add-ingredient':
+                return <AddIngredient />;
             case '/recipe':
-                return <RecipeDetails recipeId={selectedRecipeId} navigate={navigate} />;
+                return <RecipeDetails recipeId={selectedRecipeId} />;
             case '/update':
-                return <UpdateRecipe recipeId={selectedRecipeId} navigate={navigate} />;
+                return <UpdateRecipe recipeId={selectedRecipeId} navigateHome={() => navigate('/')} />;
             default:
                 return <h1 style={{ textAlign: 'center', color: '#ff4d4f' }}>404 - Page Not Found</h1>;
         }
@@ -49,6 +52,12 @@ function App() {
                         onClick={() => navigate('/add')}
                     >
                         Add Recipe
+                    </button>
+                    <button
+                        style={route === '/add-ingredient' ? styles.navButtonActive : styles.navButton}
+                        onClick={() => navigate('/add-ingredient')}
+                    >
+                        Add Ingredient
                     </button>
                 </nav>
             </header>

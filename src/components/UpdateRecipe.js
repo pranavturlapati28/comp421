@@ -1,33 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
-import { updateRecipe, deleteIngredientFromRecipe } from '../services/supabaseFunctions';
+import AddIngredient from './AddIngredient';
+import { updateRecipe, deleteIngredientFromRecipe, fetchRecipeById, fetchIngredientsByRecipeId } from '../services/supabaseFunctions';
 
-const UpdateRecipe = ({ recipeId, navigate }) => {
-    const [recipe, setRecipe] = useState(null);
+const UpdateRecipe = ({ recipeId, navigateHome }) => {
     const [ingredients, setIngredients] = useState([]);
-    const [form, setForm] = useState({ name: '', serving_amount: '', cooking_time: '' });
+    const [form, setForm] = useState({ name: '', link: '', serving_amount: 0, category: '' });
 
     useEffect(() => {
         const fetchRecipeDetails = async () => {
             try {
-                const { data: recipeData } = await supabase
-                    .from('recipe')
-                    .select('*')
-                    .eq('id', recipeId)
-                    .single();
-
-                const { data: ingredientsData } = await supabase
-                    .from('recipe_contains_ingredient')
-                    .select('ingredient_id, ingredient(name)')
-                    .eq('recipe_id', recipeId);
-
-                setRecipe(recipeData);
-                setIngredients(ingredientsData.map((item) => item.ingredient));
+                const recipeData = await fetchRecipeById(recipeId);
                 setForm({
                     name: recipeData.name,
+                    link: recipeData.link,
                     serving_amount: recipeData.serving_amount,
-                    cooking_time: recipeData.cooking_time,
+                    category: recipeData.category,
                 });
+
+                const ingredientData = await fetchIngredientsByRecipeId(recipeId);
+                const ingredientList = ingredientData.map(d => d.ingredient);
+                setIngredients(ingredientList);
             } catch (err) {
                 console.error('Error fetching recipe details:', err);
             }
@@ -36,24 +28,27 @@ const UpdateRecipe = ({ recipeId, navigate }) => {
         fetchRecipeDetails();
     }, [recipeId]);
 
-    const handleUpdate = async (e) => {
+    const handleUpdateRecipe = async (e) => {
         e.preventDefault();
         try {
             const updatedFields = {
                 name: form.name,
+                link: form.link,
                 serving_amount: form.serving_amount,
-                cooking_time: form.cooking_time,
+                category: form.category,
             };
 
-            const result = await updateRecipe(recipeId, updatedFields);
-            if (result) {
-                alert('Recipe updated successfully!');
+            const updatedRecipe = await updateRecipe(recipeId, updatedFields);
+            if (updatedRecipe) {
+                alert(`Recipe ${updatedRecipe.name} updated successfully!`);
             } else {
                 alert('Failed to update recipe.');
             }
         } catch (err) {
             console.error('Error updating recipe:', err);
         }
+
+        navigateHome();
     };
 
     const handleDeleteIngredient = async (ingredientId) => {
@@ -70,17 +65,21 @@ const UpdateRecipe = ({ recipeId, navigate }) => {
         }
     };
 
-    if (!recipe) return <p>Loading...</p>;
-
     return (
         <div>
             <h1>Update Recipe</h1>
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={handleUpdateRecipe}>
                 <input
                     type="text"
-                    placeholder="Name"
+                    placeholder="Recipe Name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+                <input
+                    type="text"
+                    placeholder="Recipe Link"
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
                 />
                 <input
                     type="number"
@@ -89,26 +88,28 @@ const UpdateRecipe = ({ recipeId, navigate }) => {
                     onChange={(e) => setForm({ ...form, serving_amount: e.target.value })}
                 />
                 <input
-                    type="number"
-                    placeholder="Cooking Time (minutes)"
-                    value={form.cooking_time}
-                    onChange={(e) => setForm({ ...form, cooking_time: e.target.value })}
+                    type="text"
+                    placeholder="Category"
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
                 />
                 <button type="submit">Update Recipe</button>
             </form>
 
-            <h2>Ingredients</h2>
+            <h3>Ingredients</h3>
             <ul>
                 {ingredients.map((ingredient) => (
                     <li key={ingredient.id}>
-                        {ingredient.name}{' '}
+                        {ingredient.name}
                         <button onClick={() => handleDeleteIngredient(ingredient.id)}>
                             Delete
                         </button>
                     </li>
                 ))}
             </ul>
-            <button onClick={() => navigate('/')}>Back to Home</button>
+            <h4>Add an ingredient: </h4>
+            <AddIngredient recipeId={recipeId} />
+            <button onClick={navigateHome}>Cancel Update</button>
         </div>
     );
 };
