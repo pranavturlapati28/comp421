@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from './supabaseClient';
 
 /** Fetch all recipes with their associated ingredients and allergies */
 export const fetchRecipes = async () => {

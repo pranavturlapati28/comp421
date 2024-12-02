@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './form.css';
 import { addIngredient, addIngredientToRecipe } from '../services/supabaseFunctions';
 
-const AddIngredient = ({recipeId = null}) => {
+const AddIngredient = ({recipeId = null, updateIngredientList }) => {
     const [form, setForm] = useState({ name: '', amount: 0, calories: 0, food_category: '' });
 
 
@@ -23,6 +23,7 @@ const AddIngredient = ({recipeId = null}) => {
             if (recipeId && result[0].id) {
                 await addIngredientToRecipe(recipeId, result[0].id);
             }
+            updateIngredientList(result[0]);
         } catch (error) {
             console.error('Error adding ingredient:', error);
             alert(`An error occurred: ${error.details}`);
