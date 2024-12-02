@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchRecipes, deleteRecipe } from '../services/supabaseFunctions';
+import { fetchRecipes, deleteRecipe, ALLERGIES, RECIPE_CATEGORIES, INGREDIENT_CATEGORIES } from '../services/supabaseFunctions';
+import { supabase } from '../supabaseClient';
 
 const RecipeList = () => {
     const [recipes, setRecipes] = useState([]);
@@ -29,10 +30,17 @@ const RecipeList = () => {
         }
     };
 
+    const logFetchedEnums = async () => {
+        console.log(ALLERGIES);
+        console.log(RECIPE_CATEGORIES);
+        console.log(INGREDIENT_CATEGORIES);
+    }
+
     if (loading) return <p>Loading recipes...</p>;
 
     return (
         <div>
+            <button onClick={() => logFetchedEnums()}>log</button>
             <h1>Recipes</h1>
             <ul>
                 {recipes.map((recipe) => (

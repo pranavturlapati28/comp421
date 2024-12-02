@@ -1,5 +1,75 @@
 import { supabase } from '../supabaseClient';
 
+let enumValuesAllergies = [];
+let enumValuesRecipeCategories = [];
+let enumValuesIngredientCategories = [];
+
+(async () => {
+    try {
+        var allergies = (await supabase.rpc('get_enum_values', {enum_name: 'allergy',})).data;
+
+        var recipe_categories = (await supabase.rpc('get_enum_values', {enum_name: 'category',})).data;
+
+        var ingredient_categories = (await supabase.rpc('get_enum_values', {enum_name: 'ingredient_category',})).data;
+
+        enumValuesAllergies = allergies;
+
+        enumValuesRecipeCategories = recipe_categories;
+
+        enumValuesIngredientCategories = ingredient_categories;
+    } catch (err) {
+        console.log(err);
+    }
+    
+})();
+
+export const fetchAllergies = async () => {
+    const {data, error} = supabase.rpc('get_enum_values', {enum_name: 'allergy',});
+    if (error) {
+        console.error('Error fetching allergies:', error)
+        throw error;
+    }
+    return data;
+}
+export const fetchRecipeCategories = async () => {
+    const {data, error} = supabase.rpc('get_enum_values', {enum_name: 'category',});
+    if (error) {
+        console.error('Error fetching allergies:', error)
+        throw error;
+    }
+    return data;
+}
+export const fetchIngredientCategories = async () => {
+    const {data, error} = supabase.rpc('get_enum_values', {enum_name: 'ingredient_category',});
+    if (error) {
+        console.error('Error fetching allergies:', error)
+        throw error;
+    }
+    return data;
+}
+
+export const ALLERGIES = supabase.rpc('get_enum_values', {enum_name: 'allergy',}).then(({data, error}) => {
+    if (error) {
+        console.error('Error fetching allergies:', error)
+        throw error;
+    }
+    return data;
+})
+export const RECIPE_CATEGORIES = supabase.rpc('get_enum_values', {enum_name: 'category',}).then(({data, error}) => {
+    if (error) {
+        console.error('Error fetching recipe categories:', error)
+        throw error;
+    }
+    return data;
+})
+export const INGREDIENT_CATEGORIES = supabase.rpc('get_enum_values', {enum_name: 'ingredient_category',}).then(({data, error}) => {
+    if (error) {
+        console.error('Error fetching ingredient categories:', error)
+        throw error;
+    }
+    return data;
+})
+
 /** Fetch all recipes with their associated ingredients and allergies */
 export const fetchRecipes = async () => {
     const { data, error } = await supabase
@@ -17,6 +87,12 @@ export const fetchRecipes = async () => {
 export const addRecipe = async (recipe, ingredients, allergies) => {
     try {
         // Insert the recipe
+
+        // If a recipe with the same name already exists, append numbers to the end 
+        console.log(recipe.name);
+        recipe.name = await appendNumberToName(recipe.name, 'recipe');
+        console.log(recipe.name);
+
         const { data: recipeData, error: recipeError } = await supabase
             .from('recipe')
             .insert([
@@ -118,7 +194,9 @@ export const fetchIngredients = async () => {
 
 /** Add a new ingredient */
 export const addIngredient = async (ingredient) => {
-    const { data, error } = await supabase
+    var id = checkIfSameNameExists(ingredient.name, 'ingredient');
+    if (!id) { // No ingredient with the same name exists
+        const { data, error } = await supabase
         .from('ingredient')
         .insert([
             {
@@ -130,11 +208,32 @@ export const addIngredient = async (ingredient) => {
         ])
         .select();
 
-    if (error) {
-        console.error('Error adding ingredient:', error);
-        throw error;
+        if (error) {
+            console.error('Error adding ingredient:', error);
+            throw error;
+        }
+        return data;
+    } else { // Ingredient with same name already exists
+        const { data, error } = await supabase
+            .from('ingredient')
+            .update([
+                {
+                    name: ingredient.name,
+                    serving_size: ingredient.serving_size,
+                    calories: ingredient.calories,
+                    food_category: ingredient.food_category,
+                },
+            ])
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Error adding ingredient:', error);
+            throw error;
+        }
+        return data;
     }
-    return data;
+
 };
 
 export const updateRecipe = async (recipeId, updatedFields) => {
@@ -167,3 +266,43 @@ export const deleteIngredientFromRecipe = async (recipeId, ingredientId) => {
         return null;
     }
 };
+
+// Check if an entry in `tablename` exists with column `name` equal to name.
+const checkIfSameNameExists = async (name, tablename) => {
+    try {
+        const {data, error} = await supabase
+            .from(tablename)
+            .select('id')
+            .eq('name', name);
+        if (data.length > 0) {
+            return data[0].id;
+        }
+        return false;
+    } catch (err) {
+        console.error('Error checking for same name:', err);
+        return false;
+    }
+}
+
+// Append #[number] to the end of the name until it is unique in the table.
+const appendNumberToName = async(name, tablename) => {
+    console.log(name);
+    var id = await checkIfSameNameExists(name, tablename);
+    if (!id) return name;
+
+    const numRegex = /#[0123456789]*$/g; // Check for '#[number]' at end of string
+
+    if (numRegex.exec(name) == null) {
+        name = name + " #2";
+    }
+
+    var numIdx = name.lastIndexOf(numRegex.exec(name)[0]);
+
+    id = await checkIfSameNameExists(name, tablename);
+    while (id) {
+        name = name.slice(0, numIdx+1) + String(Number(name.slice(numIdx+1)) + 1);
+        id = await checkIfSameNameExists(name, tablename);
+    }
+    console.log(name);
+    return name;
+}

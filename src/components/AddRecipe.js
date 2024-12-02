@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { addRecipe, fetchIngredients } from '../services/supabaseFunctions';
+import ReactDropdown from 'react-dropdown';
+import { ALLERGIES, RECIPE_CATEGORIES } from '../services/supabaseFunctions';
 
 const AddRecipe = () => {
     const [form, setForm] = useState({
@@ -26,6 +28,8 @@ const AddRecipe = () => {
         };
 
         loadIngredients();
+
+        
     }, []);
 
     const handleSubmit = async (e) => {
@@ -82,6 +86,13 @@ const AddRecipe = () => {
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
+            <ReactDropdown
+                options={RECIPE_CATEGORIES}
+                onChange={(e) => setForm({ ...form, category: e.target.value})}
+                placeholder="Select a category"
+                onFocus={() => {console.log(RECIPE_CATEGORIES)}}
+                
+                ></ReactDropdown>
 
             <h3>Select Ingredients:</h3>
             <ul>
@@ -111,7 +122,7 @@ const AddRecipe = () => {
                 type="text"
                 placeholder="Comma-separated (e.g., milk, peanuts)"
                 value={allergies}
-                onChange={(e) => setAllergies(e.target.value.split(','))}
+                onChange={(e) => setAllergies(e.target.value.split(/[ ]*,[ ]*/))}
             />
 
             <button type="submit">Add Recipe</button>
