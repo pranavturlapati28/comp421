@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './form.css';
 import { addIngredient, addIngredientToRecipe } from '../services/supabaseFunctions';
 
-const AddIngredient = ({recipeId = null, updateIngredientList }) => {
+const AddIngredient = ({recipeId = null, updateIngredientList = () => {} }) => {
     const [form, setForm] = useState({ name: '', amount: 0, calories: 0, food_category: '' });
 
 
