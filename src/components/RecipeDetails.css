@@ -1,0 +1,69 @@
+.recipe-details-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.back-button {
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.back-button:hover {
+    background-color: #ff3f3f;
+}
+
+.recipe-title {
+    color: #ff6f61;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.recipe-link {
+    color: #ff6f61;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.recipe-link:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.recipe-link-container {
+    margin: 10px 0; /* Add spacing around the link */
+}
+
+.recipe-link {
+    color: #007BFF; /* Blue link color */
+    text-decoration: underline; /* Underline for link appearance */
+    word-break: break-word; /* Prevent overflow by breaking long words */
+    display: inline-block; /* Ensure the link stays inline and avoids extra space */
+    max-width: 100%; /* Ensure it doesn’t extend beyond its container */
+}
+
+.recipe-link:hover {
+    color: #0056b3; /* Darker blue on hover for better UX */
+    text-decoration: underline; /* Keep underline on hover */
+}

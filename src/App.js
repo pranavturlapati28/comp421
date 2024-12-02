@@ -30,13 +30,23 @@ function App() {
     const renderPage = () => {
         switch (route) {
             case '/':
-                return <RecipeList onUpdate={(it) => navigate('/update', it)} />;
+                return (
+                    <RecipeList
+                        onUpdate={(id) => navigate('/update', id)}
+                        onView={(id) => navigate('/recipe', id)} // Pass the onView function
+                    />
+                );
             case '/add':
                 return <AddRecipe />;
             case '/add-ingredient':
                 return <AddIngredient />;
             case '/recipe':
-                return <RecipeDetails recipeId={selectedRecipeId} />;
+                return (
+                    <RecipeDetails
+                        recipeId={selectedRecipeId}
+                        navigateBack={() => navigate('/')}
+                    />
+                );
             case '/update':
                 return <UpdateRecipe recipeId={selectedRecipeId} navigateHome={() => navigate('/')} />;
             case '/search':
@@ -45,6 +55,7 @@ function App() {
                 return <h1 style={{ textAlign: 'center', color: '#ff4d4f' }}>404 - Page Not Found</h1>;
         }
     };
+    
 
     return (
         <div className='container'>
