@@ -54,12 +54,8 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
     const handleDeleteIngredient = async (ingredientId) => {
         try {
             const result = await deleteIngredientFromRecipe(recipeId, ingredientId);
-            if (result) {
-                setIngredients((prev) => prev.filter((ing) => ing.id !== ingredientId));
-                alert('Ingredient deleted successfully!');
-            } else {
-                alert('Failed to delete ingredient.');
-            }
+            setIngredients((prev) => prev.filter((ing) => ing.id !== ingredientId));
+            alert('Ingredient deleted successfully!');
         } catch (err) {
             console.error('Error deleting ingredient:', err);
         }
