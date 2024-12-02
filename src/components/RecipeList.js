@@ -55,7 +55,7 @@ const RecipeList = ({ onView, onUpdate }) => {
 
     return (
         <div className="recipe-list-container">
-            <h1 className="title">Recipes</h1>
+            <h1>Recipes</h1>
             <input
                 type="text"
                 placeholder="Search recipes..."
