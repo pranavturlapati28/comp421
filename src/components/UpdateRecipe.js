@@ -40,7 +40,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
 
             const updatedRecipe = await updateRecipe(recipeId, updatedFields);
             if (updatedRecipe) {
-                alert(`Recipe ${updatedRecipe.name} updated successfully!`);
+                alert(`Recipe ${updatedRecipe[0].name} updated successfully!`);
             } else {
                 alert('Failed to update recipe.');
             }
@@ -108,7 +108,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
                 ))}
             </ul>
             <h4>Add an ingredient: </h4>
-            <AddIngredient recipeId={recipeId} />
+            <AddIngredient recipeId={recipeId} updateIngredientList={(newIngredient) => setIngredients([...ingredients, newIngredient])} />
             <button onClick={navigateHome}>Cancel Update</button>
         </div>
     );
