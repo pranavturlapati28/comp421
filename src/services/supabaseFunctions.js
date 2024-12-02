@@ -1,17 +1,23 @@
 import { supabase } from './supabaseClient';
 
 /** Fetch all recipes with their associated ingredients and allergies */
-export const fetchRecipes = async () => {
-    const { data, error } = await supabase
-        .from('recipe')
-        .select();
-
-    if (error) {
-        console.error('Error fetching recipes:', error);
+export const fetchRecipes = async (procedureName = null) => {
+    try {
+        if (procedureName) {
+            const { data, error } = await supabase.rpc(procedureName);
+            if (error) throw error;
+            return data;
+        } else {
+            const { data, error } = await supabase.from('recipe').select('*');
+            if (error) throw error;
+            return data;
+        }
+    } catch (error) {
+        console.error('Error fetching recipes:', error.message);
         throw error;
     }
-    return data;
 };
+
 
 export const fetchRecipeById = async (id) => {
     const { data, error } = await supabase

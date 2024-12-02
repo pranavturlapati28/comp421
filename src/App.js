@@ -4,21 +4,16 @@ import AddRecipe from './components/AddRecipe';
 import RecipeDetails from './components/RecipeDetails';
 import UpdateRecipe from './components/UpdateRecipe';
 import AddIngredient from './components/AddIngredient';
-import SearchRecipes from './components/SearchRecipes';
 import './App.css';
+import { fetchRecipes } from './services/supabaseFunctions';
 
 function App() {
-    const [route, setRoute] = useState('/'); // Keep track of the current "route"
-    const [selectedRecipeId, setSelectedRecipeId] = useState(''); // Used for RecipeDetails
+    const [route, setRoute] = useState('/');
+    const [selectedRecipeId, setSelectedRecipeId] = useState('');
+    const [recipes, setRecipes] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [filterTitle, setFilterTitle] = useState('');
 
-    // Mock recipe data
-    const recipes = [
-        { id: 1, name: 'Pasta', ingredients: ['tomato', 'basil', 'cheese'] },
-        { id: 2, name: 'Pizza', ingredients: ['dough', 'cheese', 'pepperoni'] },
-        { id: 3, name: 'Salad', ingredients: ['lettuce', 'tomato', 'cucumber'] },
-    ];
-
-    // Navigate to a specific route
     const navigate = (path, params = null) => {
         setRoute(path);
         if (params) {
@@ -26,67 +21,86 @@ function App() {
         }
     };
 
-    // Render components based on the current route
+    const handleFilterClick = async (procedureName, title) => {
+        try {
+            setLoading(true);
+            setFilterTitle(title);
+            const data = await fetchRecipes(procedureName);
+            setRecipes(data);
+            setRoute('/filter-results');
+        } catch (error) {
+            console.error('Error fetching filtered recipes:', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const renderPage = () => {
         switch (route) {
             case '/':
-                return (
-                    <RecipeList
-                        onUpdate={(id) => navigate('/update', id)}
-                        onView={(id) => navigate('/recipe', id)} // Pass the onView function
-                    />
-                );
+                return <RecipeList onUpdate={(id) => navigate('/update', id)} onView={(id) => navigate('/recipe', id)} />;
             case '/add':
                 return <AddRecipe />;
             case '/add-ingredient':
                 return <AddIngredient />;
             case '/recipe':
-                return (
-                    <RecipeDetails
-                        recipeId={selectedRecipeId}
-                        navigateBack={() => navigate('/')}
-                    />
-                );
+                return <RecipeDetails recipeId={selectedRecipeId} navigateBack={() => navigate('/')} />;
             case '/update':
                 return <UpdateRecipe recipeId={selectedRecipeId} navigateHome={() => navigate('/')} />;
-            case '/search':
-                return <SearchRecipes recipes={recipes} />;
+            case '/filter-results':
+                return (
+                    <div className="recipe-list-container">
+                        <h1>{filterTitle}</h1>
+                        {loading ? (
+                            <p>Loading recipes...</p>
+                        ) : recipes.length > 0 ? (
+                            <div className="recipe-list">
+                                {recipes.map((recipe) => (
+                                    <div key={recipe.id} className="recipe-card">
+                                        <h3>{recipe.name}</h3>
+                                        <p>Category: {recipe.category || 'N/A'}</p>
+                                        <p>Serving Size: {recipe.serving_amount || 'N/A'}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p>No recipes found.</p>
+                        )}
+                    </div>
+                );
             default:
                 return <h1 style={{ textAlign: 'center', color: '#ff4d4f' }}>404 - Page Not Found</h1>;
         }
     };
-    
 
     return (
-        <div className='container'>
-            <header>
-                <h1 className='title'>🍳 Recipe Management App</h1>
-                <nav className='nav'>
-                    <button
-                        style={route === '/' ? styles.navButtonActive : styles.navButton}
-                        onClick={() => navigate('/')}
-                    >
+        <div className="container">
+            <header className="header">
+                <h1 className="app-title">🍳 Recipe Management App</h1>
+                <nav className="nav">
+                    <button className="nav-button" onClick={() => navigate('/')}>
                         Home
                     </button>
-                    <button
-                        style={route === '/add' ? styles.navButtonActive : styles.navButton}
-                        onClick={() => navigate('/add')}
-                    >
+                    <button className="nav-button" onClick={() => navigate('/add')}>
                         Add Recipe
                     </button>
-                    <button
-                        style={route === '/add-ingredient' ? styles.navButtonActive : styles.navButton}
-                        onClick={() => navigate('/add-ingredient')}
-                    >
+                    <button className="nav-button" onClick={() => navigate('/add-ingredient')}>
                         Add Ingredient
                     </button>
-                    <button
-                        style={route === '/search' ? styles.navButtonActive : styles.navButton}
-                        onClick={() => navigate('/search')}
-                    >
-                        Search Recipes
-                    </button>
                 </nav>
+                {route === '/' && (
+                    <div className="filter-buttons">
+                        <button onClick={() => handleFilterClick('get_milk', 'Milk-Free Recipes')}>Milk-Free</button>
+                        <button onClick={() => handleFilterClick('get_eggs', 'Egg-Free Recipes')}>Egg-Free</button>
+                        <button onClick={() => handleFilterClick('get_fish', 'Fish-Free Recipes')}>Fish-Free</button>
+                        <button onClick={() => handleFilterClick('get_shellfish', 'Shellfish-Free Recipes')}>Shellfish-Free</button>
+                        <button onClick={() => handleFilterClick('get_tree_nuts', 'Tree Nuts-Free Recipes')}>Tree Nuts-Free</button>
+                        <button onClick={() => handleFilterClick('get_peanuts', 'Peanut-Free Recipes')}>Peanut-Free</button>
+                        <button onClick={() => handleFilterClick('get_wheat', 'Wheat-Free Recipes')}>Wheat-Free</button>
+                        <button onClick={() => handleFilterClick('get_soybeans', 'Soy-Free Recipes')}>Soy-Free</button>
+                        <button onClick={() => handleFilterClick('get_sesame', 'Sesame-Free Recipes')}>Sesame-Free</button>
+                    </div>
+                )}
             </header>
             <main>{renderPage()}</main>
         </div>
@@ -94,24 +108,3 @@ function App() {
 }
 
 export default App;
-
-const styles = {
-    navButton: {
-        backgroundColor: '#fff',
-        color: '#ff6f61',
-        border: 'none',
-        padding: '10px 15px',
-        margin: '5px',
-        cursor: 'pointer',
-        borderRadius: '5px',
-    },
-    navButtonActive: {
-        backgroundColor: '#ff6f61',
-        color: '#fff',
-        border: 'none',
-        padding: '10px 15px',
-        margin: '5px',
-        cursor: 'pointer',
-        borderRadius: '5px',
-    },
-};
