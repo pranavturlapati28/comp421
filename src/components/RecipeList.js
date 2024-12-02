@@ -1,10 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { fetchRecipes, deleteRecipe, ALLERGIES, RECIPE_CATEGORIES, INGREDIENT_CATEGORIES } from '../services/supabaseFunctions';
 import { supabase } from '../supabaseClient';
+import { fetchRecipes, deleteRecipe } from '../services/supabaseFunctions';
+import './RecipeList.css';
 
-const RecipeList = () => {
+const RecipeCard = ({ recipe, onView, onUpdate, onDelete }) => {
+    return (
+        <div className="recipe-card">
+            {recipe.image && <img src={recipe.image} alt={recipe.name} className="recipe-image" />}
+            <h3>{recipe.name}</h3>
+            <p>Category: {recipe.category || 'N/A'}</p>
+            <p>Serving Size: {recipe.serving_amount || 'N/A'}</p>
+            <div className="recipe-actions">
+                <button onClick={() => onView(recipe.id)}>View</button>
+                <button onClick={() => onUpdate(recipe.id)}>Update</button>
+                <button onClick={() => onDelete(recipe.id)}>Delete</button>
+            </div>
+        </div>
+    );
+};
+
+const RecipeList = ({ onView, onUpdate }) => {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const loadRecipes = async () => {
@@ -35,27 +54,37 @@ const RecipeList = () => {
         console.log(RECIPE_CATEGORIES);
         console.log(INGREDIENT_CATEGORIES);
     }
+    const filteredRecipes = recipes.filter((recipe) =>
+        recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (loading) return <p>Loading recipes...</p>;
 
     return (
-        <div>
-            <button onClick={() => logFetchedEnums()}>log</button>
+        <div className="recipe-list-container">
             <h1>Recipes</h1>
-            <ul>
-                {recipes.map((recipe) => (
-                    <li key={recipe.id}>
-                        <h2>{recipe.name}</h2>
-                        <p>Serving Amount: {recipe.serving_amount}</p>
-                        <p>Category: {recipe.category}</p>
-
-                        <a href={recipe.link} target="_blank" rel="noopener noreferrer">
-                            Instructions
-                        </a>
-                        <button onClick={() => handleDelete(recipe.id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+            <input
+                type="text"
+                placeholder="Search recipes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-bar"
+            />
+            <div className="recipe-list">
+                {filteredRecipes.length > 0 ? (
+                    filteredRecipes.map((recipe) => (
+                        <RecipeCard
+                            key={recipe.id}
+                            recipe={recipe}
+                            onView={onView} // Pass onView to RecipeCard
+                            onUpdate={onUpdate}
+                            onDelete={handleDelete}
+                        />
+                    ))
+                ) : (
+                    <p>No recipes found. Try a different search term.</p>
+                )}
+            </div>
         </div>
     );
 };

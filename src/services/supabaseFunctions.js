@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from './supabaseClient';
 
 let enumValuesAllergies = [];
 let enumValuesRecipeCategories = [];
@@ -71,13 +71,57 @@ export const INGREDIENT_CATEGORIES = supabase.rpc('get_enum_values', {enum_name:
 })
 
 /** Fetch all recipes with their associated ingredients and allergies */
-export const fetchRecipes = async () => {
+export const fetchRecipes = async (procedureName = null) => {
+    try {
+        if (procedureName) {
+            const { data, error } = await supabase.rpc(procedureName);
+            if (error) throw error;
+            return data;
+        } else {
+            const { data, error } = await supabase.from('recipe').select('*');
+            if (error) throw error;
+            return data;
+        }
+    } catch (error) {
+        console.error('Error fetching recipes:', error.message);
+        throw error;
+    }
+};
+
+
+export const fetchRecipeById = async (id) => {
     const { data, error } = await supabase
         .from('recipe')
-        .select();
+        .select()
+        .eq('id', id)
+        .single();
 
     if (error) {
-        console.error('Error fetching recipes:', error);
+        console.error(`Recipe with id ${id} not found.`);
+        throw error;
+    }
+
+    return data;
+}
+
+/** Fetch details for a specific recipe, including its ingredients and allergies */
+export const fetchRecipeDetails = async (id) => {
+    const { data, error } = await supabase
+        .from('recipe')
+        .select(`
+            id,
+            name,
+            link,
+            serving_amount,
+            category,
+            recipe_contains_ingredient (ingredient_id, ingredient (name, calories, food_category)),
+            recipe_contains_allergy (allergy)
+        `)
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching recipe details:', error);
         throw error;
     }
     return data;
@@ -138,26 +182,18 @@ export const addRecipe = async (recipe, ingredients, allergies) => {
     }
 };
 
-/** Fetch details for a specific recipe, including its ingredients and allergies */
-export const fetchRecipeDetails = async (id) => {
+export const updateRecipe = async (recipeId, updatedFields) => {
     const { data, error } = await supabase
         .from('recipe')
-        .select(`
-            id,
-            name,
-            link,
-            serving_amount,
-            category,
-            recipe_contains_ingredient (ingredient_id, ingredient (name, calories, food_category)),
-            recipe_contains_allergy (allergy)
-        `)
-        .eq('id', id)
-        .single();
+        .update(updatedFields)
+        .eq('id', recipeId)
+        .select();
 
     if (error) {
-        console.error('Error fetching recipe details:', error);
+        console.error('Error updating recipe:', error);
         throw error;
     }
+
     return data;
 };
 
@@ -192,6 +228,19 @@ export const fetchIngredients = async () => {
     return data;
 };
 
+export const fetchIngredientsByRecipeId = async (recipeId) => {
+    const { data, error } = await supabase
+    .from('recipe_contains_ingredient')
+    .select('ingredient (*)')
+    .eq('recipe_id', recipeId);
+
+    if (error) {
+        console.error('Error fetching ingredients:', error);
+        throw error;
+    }
+    return data;
+}
+
 /** Add a new ingredient */
 export const addIngredient = async (ingredient) => {
     var id = checkIfSameNameExists(ingredient.name, 'ingredient');
@@ -201,7 +250,7 @@ export const addIngredient = async (ingredient) => {
         .insert([
             {
                 name: ingredient.name,
-                serving_size: ingredient.serving_size,
+                amount: ingredient.amount,
                 calories: ingredient.calories,
                 food_category: ingredient.food_category,
             },
@@ -236,34 +285,28 @@ export const addIngredient = async (ingredient) => {
 
 };
 
-export const updateRecipe = async (recipeId, updatedFields) => {
-    try {
-        const { data, error } = await supabase
-            .from('recipe')
-            .update(updatedFields)
-            .eq('id', recipeId);
+export const addIngredientToRecipe = async (recipeId, ingredientId) => {
+    const { error } = await supabase
+        .from('recipe_contains_ingredient')
+        .insert({recipe_id: recipeId, ingredient_id: ingredientId});
 
-        if (error) throw error;
-        return data;
-    } catch (err) {
-        console.error('Error updating recipe:', err);
-        return null;
+    console.log(ingredientId);
+
+    if (error) {
+        console.error('Error adding ingredient:', error);
+        throw error;
     }
-};
-
+}
 
 export const deleteIngredientFromRecipe = async (recipeId, ingredientId) => {
-    try {
-        const { data, error } = await supabase
-            .from('recipe_contains_ingredient')
-            .delete()
-            .match({ recipe_id: recipeId, ingredient_id: ingredientId });
+    const { error } = await supabase
+        .from('recipe_contains_ingredient')
+        .delete()
+        .match({ recipe_id: recipeId, ingredient_id: ingredientId });
 
-        if (error) throw error;
-        return data;
-    } catch (err) {
-        console.error('Error deleting ingredient:', err);
-        return null;
+    if (error) {
+        console.error('Error deleting ingredient:', error);
+        throw error;
     }
 };
 
