@@ -33,27 +33,6 @@ function App() {
                 return <RecipeDetails recipeId={selectedRecipeId} navigateBack={() => navigate('/')} />;
             case '/update':
                 return <UpdateRecipe recipeId={selectedRecipeId} navigateHome={() => navigate('/')} />;
-            case '/filter-results':
-                return (
-                    <div className="recipe-list-container">
-                        <h1>{filterTitle}</h1>
-                        {loading ? (
-                            <p>Loading recipes...</p>
-                        ) : recipes.length > 0 ? (
-                            <div className="recipe-list">
-                                {recipes.map((recipe) => (
-                                    <div key={recipe.id} className="recipe-card">
-                                        <h3>{recipe.name}</h3>
-                                        <p>Category: {recipe.category || 'N/A'}</p>
-                                        <p>Serving Size: {recipe.serving_amount || 'N/A'}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p>No recipes found.</p>
-                        )}
-                    </div>
-                );
             default:
                 return <h1 style={{ textAlign: 'center', color: '#ff4d4f' }}>404 - Page Not Found</h1>;
         }

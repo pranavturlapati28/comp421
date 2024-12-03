@@ -226,10 +226,6 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             <button onClick={handleAddAllergy} className="add-button">
                 Add Allergy
             </button>
-
-            <button onClick={navigateHome} className="cancel-button">
-                Cancel Update
-            </button>
         </div>
     );
 };

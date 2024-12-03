@@ -4,8 +4,6 @@ import ReactDropdown from 'react-dropdown';
 import { ALLERGIES, RECIPE_CATEGORIES } from '../services/supabaseFunctions';
 
 const AddRecipe = () => {
-    console.log('rendering');
-
     const [_, forceUpdate] = useState(0);
     const refresh = () => forceUpdate((count) => count + 1);
 

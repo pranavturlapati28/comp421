@@ -1,28 +1,5 @@
 import { supabase } from './supabaseClient';
 
-let enumValuesAllergies = [];
-let enumValuesRecipeCategories = [];
-let enumValuesIngredientCategories = [];
-
-(async () => {
-    try {
-        var allergies = (await supabase.rpc('get_enum_values', {enum_name: 'allergy',})).data;
-
-        var recipe_categories = (await supabase.rpc('get_enum_values', {enum_name: 'category',})).data;
-
-        var ingredient_categories = (await supabase.rpc('get_enum_values', {enum_name: 'ingredient_category',})).data;
-
-        enumValuesAllergies = allergies;
-
-        enumValuesRecipeCategories = recipe_categories;
-
-        enumValuesIngredientCategories = ingredient_categories;
-    } catch (err) {
-        console.log(err);
-    }
-    
-})();
-
 export const fetchAllergies = async () => {
     const {data, error} = supabase.rpc('get_enum_values', {enum_name: 'allergy',});
     if (error) {
