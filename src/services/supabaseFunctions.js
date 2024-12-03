@@ -205,11 +205,6 @@ export const updateRecipe = async (recipeId, updatedFields) => {
     return data;
 };
 
-export const addRecipeIngredients = async (recipeId, ingredientList) => {
-    const { data, error } = await supabase
-        .from('recipe_contains_ingredient')
-}
-
 /** Delete a recipe and its associated relationships */
 export const deleteRecipe = async (id) => {
     try {
@@ -256,7 +251,7 @@ export const fetchIngredientsByRecipeId = async (recipeId) => {
 
 /** Add a new ingredient */
 export const addIngredient = async (ingredient) => {
-    var id = checkIfSameNameExists(ingredient.name, 'ingredient');
+    var id = await checkIfSameNameExists(ingredient.name, 'ingredient');
     if (!id) { // No ingredient with the same name exists
         const { data, error } = await supabase
         .from('ingredient')
@@ -278,14 +273,7 @@ export const addIngredient = async (ingredient) => {
     } else { // Ingredient with same name already exists
         const { data, error } = await supabase
             .from('ingredient')
-            .update([
-                {
-                    name: ingredient.name,
-                    serving_size: ingredient.serving_size,
-                    calories: ingredient.calories,
-                    food_category: ingredient.food_category,
-                },
-            ])
+            .update(ingredient)
             .eq('id', id)
             .select();
 
