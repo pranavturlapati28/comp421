@@ -303,8 +303,6 @@ export const addIngredientToRecipe = async (recipeId, ingredientId) => {
         .from('recipe_contains_ingredient')
         .insert({recipe_id: recipeId, ingredient_id: ingredientId});
 
-    console.log(ingredientId);
-
     if (error) {
         console.error('Error adding ingredient:', error);
         throw error;
@@ -389,6 +387,7 @@ export const fetchAllergiesByRecipeId = async (recipeId) => {
 
 export const addAllergyToRecipe = async (recipeId, allergy) => {
     try {
+
         const { data, error } = await supabase
             .from('recipe_contains_allergy')
             .insert([{ recipe_id: recipeId, allergy }])

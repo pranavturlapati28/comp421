@@ -9,12 +9,14 @@ import {
     fetchAllergiesByRecipeId,
     addAllergyToRecipe,
     deleteAllergyFromRecipe,
-    RECIPE_CATEGORIES
+    RECIPE_CATEGORIES,
+    addIngredientToRecipe
 } from '../services/supabaseFunctions';
 import ReactDropdown from 'react-dropdown';
 import './UpdateRecipe.css';
 
 const UpdateRecipe = ({ recipeId, navigateHome }) => {
+
     const [ingredients, setIngredients] = useState([]);
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [recipeCategories, setRecipeCategories] = useState([]);
@@ -42,7 +44,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
 
                 const ingredientData = await fetchIngredientsByRecipeId(recipeId);
                 const ingredientList = ingredientData.map(d => d.ingredient);
-                setIngredients(ingredientList);
+                setSelectedIngredients(ingredientList);
 
                 const allergyData = await fetchAllergiesByRecipeId(recipeId);
                 setAllergies(allergyData);
@@ -91,8 +93,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
     const handleDeleteIngredient = async (ingredientId) => {
         try {
             await deleteIngredientFromRecipe(recipeId, ingredientId);
-            setIngredients((prev) => prev.filter((ing) => ing.id !== ingredientId));
-            alert('Ingredient deleted successfully!');
+            setSelectedIngredients((prev) => prev.filter((ingredient) => ingredient.id !== ingredientId));
         } catch (err) {
             console.error('Error deleting ingredient:', err);
         }
@@ -113,7 +114,6 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
         try {
             await deleteAllergyFromRecipe(recipeId, allergyId);
             setAllergies((prev) => prev.filter((allergy) => allergy.id !== allergyId));
-            alert('Allergy deleted successfully!');
         } catch (err) {
             console.error('Error deleting allergy:', err);
         }
@@ -162,7 +162,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
 
             <h3>Ingredients</h3>
             <ul className="ingredients-list">
-                {ingredients.map((ingredient) => (
+                {selectedIngredients.map((ingredient) => (
                     <li key={ingredient.id} className="ingredient-item">
                         {ingredient.name}
                         <button
@@ -178,18 +178,15 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             <h4>Add an ingredient:</h4>
             <ul>
                 {ingredients.map((ingredient) => (
+                    selectedIngredients.map(i => i.id).includes(ingredient.id) ? <div></div> :
                     <li key={ingredient.id}>
                         <label>
                             <input
                                 type="checkbox"
                                 value={ingredient.id}
                                 onChange={(e) => {
-                                    const id = parseInt(e.target.value);
-                                    setIngredients((prev) =>
-                                        e.target.checked
-                                            ? [...prev, id]
-                                            : prev.filter((ingId) => ingId !== id)
-                                    );
+                                    addIngredientToRecipe(recipeId, ingredient.id);
+                                    setSelectedIngredients([...selectedIngredients, ingredient]);
                                 }}
                             />
                             {ingredient.name}
