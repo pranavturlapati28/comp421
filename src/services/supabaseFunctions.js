@@ -71,12 +71,18 @@ export const INGREDIENT_CATEGORIES = supabase.rpc('get_enum_values', {enum_name:
 })
 
 /** Fetch all recipes with their associated ingredients and allergies */
-export const fetchRecipes = async (procedureName = null) => {
+export const fetchRecipes = async (procedureName = null, arg = null) => {
     try {
         if (procedureName) {
-            const { data, error } = await supabase.rpc(procedureName);
-            if (error) throw error;
-            return data;
+            if (arg) {
+                const { data, error } = await supabase.rpc(procedureName, {allergies: arg});
+                if (error) throw error;
+                return data;
+            } else {
+                const { data, error } = await supabase.rpc(procedureName);
+                if (error) throw error;
+                return data;
+            }
         } else {
             const { data, error } = await supabase.from('recipe').select('*');
             if (error) throw error;
