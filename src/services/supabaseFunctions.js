@@ -355,3 +355,51 @@ const appendNumberToName = async(name, tablename) => {
     console.log(name);
     return name;
 }
+
+
+export const fetchAllergiesByRecipeId = async (recipeId) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipe_contains_allergy')
+            .select('id, allergy')
+            .eq('recipe_id', recipeId);
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error('Error fetching allergies:', err);
+        throw err;
+    }
+};
+
+
+export const addAllergyToRecipe = async (recipeId, allergy) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipe_contains_allergy')
+            .insert([{ recipe_id: recipeId, allergy }])
+            .select();
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error('Error adding allergy:', err);
+        throw err;
+    }
+};
+
+export const deleteAllergyFromRecipe = async (recipeId, allergyId) => {
+    try {
+        const { data, error } = await supabase
+            .from('recipe_contains_allergy')
+            .delete()
+            .eq('recipe_id', recipeId)
+            .eq('id', allergyId);
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error('Error deleting allergy:', err);
+        throw err;
+    }
+};

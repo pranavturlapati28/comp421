@@ -6,10 +6,9 @@
   box-sizing: border-box;
 }
 
-.header {
+header {
   text-align: center;
   background-color: #ff6f61;
-  color: white;
   padding: 20px 0;
   border-radius: 5px;
 }
@@ -59,14 +58,15 @@
 
 h1 {
   font-size: 30px;
+  color: white;
   margin: 0;
   padding-bottom: 10px;
 }
 
 h2 {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 15px;
-  color: #333;
+  color: #ff6f61;
 }
 
 .recipe-list-container {

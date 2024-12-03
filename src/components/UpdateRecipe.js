@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import AddIngredient from './AddIngredient';
-import { updateRecipe, deleteIngredientFromRecipe, fetchRecipeById, fetchIngredientsByRecipeId } from '../services/supabaseFunctions';
+import { 
+    updateRecipe, 
+    deleteIngredientFromRecipe, 
+    fetchRecipeById, 
+    fetchIngredientsByRecipeId,
+    fetchAllergiesByRecipeId,
+    addAllergyToRecipe,
+    deleteAllergyFromRecipe
+} from '../services/supabaseFunctions';
 import './UpdateRecipe.css';
 
 const UpdateRecipe = ({ recipeId, navigateHome }) => {
     const [ingredients, setIngredients] = useState([]);
+    const [allergies, setAllergies] = useState([]);
     const [form, setForm] = useState({ name: '', link: '', serving_amount: 0, category: '' });
+    const [newAllergy, setNewAllergy] = useState('');
 
     useEffect(() => {
         const fetchRecipeDetails = async () => {
@@ -21,6 +31,9 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
                 const ingredientData = await fetchIngredientsByRecipeId(recipeId);
                 const ingredientList = ingredientData.map(d => d.ingredient);
                 setIngredients(ingredientList);
+
+                const allergyData = await fetchAllergiesByRecipeId(recipeId);
+                setAllergies(allergyData);
             } catch (err) {
                 console.error('Error fetching recipe details:', err);
             }
@@ -59,6 +72,27 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             alert('Ingredient deleted successfully!');
         } catch (err) {
             console.error('Error deleting ingredient:', err);
+        }
+    };
+
+    const handleAddAllergy = async () => {
+        try {
+            const addedAllergy = await addAllergyToRecipe(recipeId, newAllergy);
+            setAllergies((prev) => [...prev, ...addedAllergy]);
+            setNewAllergy('');
+            alert('Allergy added successfully!');
+        } catch (err) {
+            console.error('Error adding allergy:', err);
+        }
+    };
+
+    const handleDeleteAllergy = async (allergyId) => {
+        try {
+            await deleteAllergyFromRecipe(recipeId, allergyId);
+            setAllergies((prev) => prev.filter((allergy) => allergy.id !== allergyId));
+            alert('Allergy deleted successfully!');
+        } catch (err) {
+            console.error('Error deleting allergy:', err);
         }
     };
 
@@ -110,7 +144,10 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
                 {ingredients.map((ingredient) => (
                     <li key={ingredient.id} className="ingredient-item">
                         {ingredient.name}
-                        <button onClick={() => handleDeleteIngredient(ingredient.id)} className="delete-button">
+                        <button
+                            onClick={() => handleDeleteIngredient(ingredient.id)}
+                            className="delete-button"
+                        >
                             Delete
                         </button>
                     </li>
@@ -120,10 +157,40 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             <h4>Add an ingredient:</h4>
             <AddIngredient
                 recipeId={recipeId}
-                updateIngredientList={(newIngredient) => setIngredients([...ingredients, newIngredient])}
+                updateIngredientList={(newIngredient) =>
+                    setIngredients([...ingredients, newIngredient])
+                }
             />
 
-            <button onClick={navigateHome} className="cancel-button">Cancel Update</button>
+            <h3>Allergies</h3>
+            <ul className="allergies-list">
+                {allergies.map((allergy) => (
+                    <li key={allergy.id} className="allergy-item">
+                        {allergy.allergy}
+                        <button
+                            onClick={() => handleDeleteAllergy(allergy.id)}
+                            className="delete-button"
+                        >
+                            Delete
+                        </button>
+                    </li>
+                ))}
+            </ul>
+
+            <h4>Add an allergy:</h4>
+            <input
+                type="text"
+                placeholder="Add Allergy"
+                value={newAllergy}
+                onChange={(e) => setNewAllergy(e.target.value)}
+            />
+            <button onClick={handleAddAllergy} className="add-button">
+                Add Allergy
+            </button>
+
+            <button onClick={navigateHome} className="cancel-button">
+                Cancel Update
+            </button>
         </div>
     );
 };
