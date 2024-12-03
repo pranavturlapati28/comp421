@@ -61,7 +61,7 @@ const AddRecipe = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <h1>Add a New Recipe</h1>
+            <h2>Add a New Recipe</h2>
             <input
                 type="text"
                 placeholder="Recipe Name"

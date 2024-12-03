@@ -124,7 +124,7 @@ const RecipeList = ({ onView, onUpdate }) => {
 
     return (
         <div className="recipe-list-container">
-            <h1>Recipes</h1>
+            <h2>Recipes</h2>
             <button onClick={() => logFetchedEnums()}>log</button>
             <input
                 type="text"

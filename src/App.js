@@ -61,7 +61,7 @@ function App() {
 
     return (
         <div className="container">
-            <header className="header">
+            <header>
                 <h1 className="app-title">🍳 Recipe Management App</h1>
                 <nav className="nav">
                     <button className="nav-button" onClick={() => navigate('/')}>
