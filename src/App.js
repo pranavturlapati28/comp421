@@ -21,20 +21,6 @@ function App() {
         }
     };
 
-    const handleFilterClick = async (procedureName, title) => {
-        try {
-            setLoading(true);
-            setFilterTitle(title);
-            const data = await fetchRecipes(procedureName);
-            setRecipes(data);
-            setRoute('/filter-results');
-        } catch (error) {
-            console.error('Error fetching filtered recipes:', error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const renderPage = () => {
         switch (route) {
             case '/':
@@ -88,19 +74,6 @@ function App() {
                         Add Ingredient
                     </button>
                 </nav>
-                {route === '/' && (
-                    <div className="filter-buttons">
-                        <button onClick={() => handleFilterClick('get_milk', 'Milk-Free Recipes')}>Milk-Free</button>
-                        <button onClick={() => handleFilterClick('get_eggs', 'Egg-Free Recipes')}>Egg-Free</button>
-                        <button onClick={() => handleFilterClick('get_fish', 'Fish-Free Recipes')}>Fish-Free</button>
-                        <button onClick={() => handleFilterClick('get_shellfish', 'Shellfish-Free Recipes')}>Shellfish-Free</button>
-                        <button onClick={() => handleFilterClick('get_tree_nuts', 'Tree Nuts-Free Recipes')}>Tree Nuts-Free</button>
-                        <button onClick={() => handleFilterClick('get_peanuts', 'Peanut-Free Recipes')}>Peanut-Free</button>
-                        <button onClick={() => handleFilterClick('get_wheat', 'Wheat-Free Recipes')}>Wheat-Free</button>
-                        <button onClick={() => handleFilterClick('get_soybeans', 'Soy-Free Recipes')}>Soy-Free</button>
-                        <button onClick={() => handleFilterClick('get_sesame', 'Sesame-Free Recipes')}>Sesame-Free</button>
-                    </div>
-                )}
             </header>
             <main>{renderPage()}</main>
         </div>
