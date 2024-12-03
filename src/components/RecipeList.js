@@ -27,7 +27,7 @@ const RecipeList = ({ onView, onUpdate }) => {
     const [allergies, setAllergies] =  useState([]);
     const [allergies_filter, setAllergiesFilter] = useState(new Map());
     const [selected_allergies, setSelectedAllergies] = useState([]);
-    const [recipe_categories, setRecipeCategories] =  useState([]);
+    const [recipe_categories, setRecipeCategories] = useState([]);
     const [ingredient_categories, setIngredientCategories] =  useState([]);
 
     const loadAllergies = async () => {
