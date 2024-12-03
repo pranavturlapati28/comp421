@@ -143,6 +143,8 @@ export const addRecipe = async (recipe, ingredients, allergies) => {
         recipe.name = await appendNumberToName(recipe.name, 'recipe');
         console.log(recipe.name);
 
+        recipe.link = addHttpsToLink(recipe.link);
+
         const { data: recipeData, error: recipeError } = await supabase
             .from('recipe')
             .insert([
@@ -354,6 +356,13 @@ const appendNumberToName = async(name, tablename) => {
     }
     console.log(name);
     return name;
+}
+
+const addHttpsToLink = (link) => {
+    if (link.length < 9 || (link.slice(0, 8) != 'https://')) {
+        return 'https://' + link;
+    }
+    return link;
 }
 
 
