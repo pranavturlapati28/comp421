@@ -205,6 +205,11 @@ export const updateRecipe = async (recipeId, updatedFields) => {
     return data;
 };
 
+export const addRecipeIngredients = async (recipeId, ingredientList) => {
+    const { data, error } = await supabase
+        .from('recipe_contains_ingredient')
+}
+
 /** Delete a recipe and its associated relationships */
 export const deleteRecipe = async (id) => {
     try {

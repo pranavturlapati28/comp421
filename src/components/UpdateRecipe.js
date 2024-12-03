@@ -3,19 +3,31 @@ import AddIngredient from './AddIngredient';
 import { 
     updateRecipe, 
     deleteIngredientFromRecipe, 
+    fetchIngredients,
     fetchRecipeById, 
     fetchIngredientsByRecipeId,
     fetchAllergiesByRecipeId,
     addAllergyToRecipe,
-    deleteAllergyFromRecipe
+    deleteAllergyFromRecipe,
+    RECIPE_CATEGORIES
 } from '../services/supabaseFunctions';
+import ReactDropdown from 'react-dropdown';
 import './UpdateRecipe.css';
 
 const UpdateRecipe = ({ recipeId, navigateHome }) => {
     const [ingredients, setIngredients] = useState([]);
+    const [selectedIngredients, setSelectedIngredients] = useState([]);
+    const [recipeCategories, setRecipeCategories] = useState([]);
     const [allergies, setAllergies] = useState([]);
     const [form, setForm] = useState({ name: '', link: '', serving_amount: 0, category: '' });
     const [newAllergy, setNewAllergy] = useState('');
+ 
+    const loadRecipeCategories = async () => {
+        try {
+            setRecipeCategories(await RECIPE_CATEGORIES);
+        }
+        catch (error) {console.error('Error fetching recipe categories:', error)}
+    };  
 
     useEffect(() => {
         const fetchRecipeDetails = async () => {
@@ -39,7 +51,18 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             }
         };
 
+        const loadIngredients = async () => {
+            try {
+                const data = await fetchIngredients();
+                setIngredients(data);
+            } catch (error) {
+                console.error('Error fetching ingredients:', error);
+            }
+        };
+
         fetchRecipeDetails();
+        loadIngredients();
+        loadRecipeCategories();
     }, [recipeId]);
 
     const handleUpdateRecipe = async (e) => {
@@ -67,7 +90,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
 
     const handleDeleteIngredient = async (ingredientId) => {
         try {
-            const result = await deleteIngredientFromRecipe(recipeId, ingredientId);
+            await deleteIngredientFromRecipe(recipeId, ingredientId);
             setIngredients((prev) => prev.filter((ing) => ing.id !== ingredientId));
             alert('Ingredient deleted successfully!');
         } catch (err) {
@@ -98,7 +121,7 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
 
     return (
         <div className="update-recipe-container">
-            <h1>Update Recipe</h1>
+            <h2>Update Recipe</h2>
             <form className="update-recipe-form" onSubmit={handleUpdateRecipe}>
                 <label>
                     Recipe Name
@@ -127,15 +150,13 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
                         onChange={(e) => setForm({ ...form, serving_amount: e.target.value })}
                     />
                 </label>
-                <label>
-                    Category
-                    <input
-                        type="text"
-                        placeholder="Category"
-                        value={form.category}
-                        onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    />
-                </label>
+                <ReactDropdown
+                    options={recipeCategories}
+                    value={'Select a category'}
+                    onChange={(e) => setForm({ ...form, category: e.value})}
+                    placeholder="Select a category"
+                    onFocus={() => {console.log(recipeCategories)}}
+                ></ReactDropdown>
                 <button type="submit" className="update-button">Update Recipe</button>
             </form>
 
@@ -155,6 +176,27 @@ const UpdateRecipe = ({ recipeId, navigateHome }) => {
             </ul>
 
             <h4>Add an ingredient:</h4>
+            <ul>
+                {ingredients.map((ingredient) => (
+                    <li key={ingredient.id}>
+                        <label>
+                            <input
+                                type="checkbox"
+                                value={ingredient.id}
+                                onChange={(e) => {
+                                    const id = parseInt(e.target.value);
+                                    setIngredients((prev) =>
+                                        e.target.checked
+                                            ? [...prev, id]
+                                            : prev.filter((ingId) => ingId !== id)
+                                    );
+                                }}
+                            />
+                            {ingredient.name}
+                        </label>
+                    </li>
+                ))}
+            </ul>
             <AddIngredient
                 recipeId={recipeId}
                 updateIngredientList={(newIngredient) =>
